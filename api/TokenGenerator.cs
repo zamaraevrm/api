@@ -30,7 +30,9 @@ public class TokenGenerator
 				{
 					new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
 					new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-					new Claim(ClaimTypes.Name, user.Name),
+					new Claim(JwtRegisteredClaimNames.GivenName, user.Firstname),
+					new Claim(JwtRegisteredClaimNames.FamilyName,user.Surname),
+					new Claim("middle_name",user.Patronymic ?? ""),
 					new Claim(ClaimTypes.Email, user.Email),
 					new Claim(ClaimTypes.Role, user.Role),
 				}

@@ -1,9 +1,11 @@
-﻿namespace api.Model.Response;
+﻿namespace api.Model.Request;
 
 public record UserRegistrationDto
     (
         string Email, 
-        string Name, 
+        string Firstname,
+        string Surname,
+        string? Patronymic,
         string Password,
         string Role
     );

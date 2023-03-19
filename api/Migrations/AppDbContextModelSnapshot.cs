@@ -32,12 +32,15 @@ namespace api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Firstname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<byte[]>("HashPassword")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
+                    b.Property<string>("Patronymic")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
@@ -47,6 +50,10 @@ namespace api.Migrations
                     b.Property<byte[]>("Salt")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

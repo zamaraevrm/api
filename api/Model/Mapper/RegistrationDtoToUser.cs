@@ -1,4 +1,5 @@
-﻿using api.Model.Response;
+﻿using api.Model.Request;
+using api.Model.Response;
 using Microsoft.AspNetCore.Identity;
 
 namespace api.Model.Mapper;
@@ -14,7 +15,9 @@ public static class RegistrationDtoToUser
         User user = new()
         {
             Email = registrationData.Email,
-            Name = registrationData.Name,
+            Firstname = registrationData.Firstname,
+            Surname = registrationData.Surname,
+            Patronymic = registrationData.Patronymic,
             HashPassword = password,
             Salt = salt,
             Role = registrationData.Role

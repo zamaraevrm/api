@@ -2,6 +2,7 @@ using System.Text;
 using api;
 using api.DataAccess;
 using api.Model.Mapper;
+using api.Model.Request;
 using api.Model.Response;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -13,12 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddAuthentication(o =>
-    {
-        o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -29,7 +25,7 @@ builder.Services.AddAuthentication(o =>
                 (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
             ValidateIssuer = true,
             ValidateAudience = true,
-            ValidateLifetime = false,
+            ValidateLifetime = true,
             ValidateIssuerSigningKey = true
         };
     });
@@ -42,11 +38,22 @@ builder.Services.AddAuthorization(options =>
     );
 });
 
+builder.Services.AddCors(options =>
+{
+        options.AddPolicy("CorsPolicy", policyBuilder =>
+        {
+            policyBuilder.WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 builder.Services.AddScoped<TokenGenerator>();
 builder.Services.AddScoped<TokenValidator>();
 
 var app = builder.Build();
 
+app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -66,7 +73,6 @@ async(
 
     if (!PasswordHasher.VerifyPassword(loginData.Password, user.HashPassword, user.Salt))
         return Results.BadRequest("Incorrect password");
-        
     
     var accessToken = tokens.GenerateAccessToken(user);
     var (refreshTokenId, refreshToken) = tokens.GenerateRefreshToken();
@@ -84,8 +90,8 @@ async(
         SameSite = SameSiteMode.Strict
     });
 
-    return Results.Ok(accessToken);
-});
+    return Results.Ok(new LoginResponse(accessToken, user.ToUserResponse()));
+}).RequireCors("CorsPolicy");
 
 app.MapPost("/api/auth/signup",  [AllowAnonymous] async(
     HttpRequest request,
@@ -103,7 +109,7 @@ app.MapPost("/api/auth/signup",  [AllowAnonymous] async(
     await context.SaveChangesAsync();
     
     return Results.Ok();
-});
+}).RequireCors("CorsPolicy");
 
 app.MapPost("/api/auth/refresh", [AllowAnonymous] async (
     HttpRequest request,
@@ -145,9 +151,9 @@ app.MapPost("/api/auth/refresh", [AllowAnonymous] async (
     });
 
     return Results.Ok(accessToken);
-});
+}).RequireCors("CorsPolicy");
 
-app.MapDelete("/api/auth/signout", async (
+app.MapDelete("/api/auth/sign-out", async (
     HttpRequest request,
     HttpResponse response,
     AppDbContext db,
@@ -170,13 +176,15 @@ app.MapDelete("/api/auth/signout", async (
 
     response.Cookies.Delete("refresh_token");
     return Results.NoContent();
-});
+}).RequireCors("CorsPolicy");
 
 
 
-app.MapGet("/api/helloworld", () => "Hello World!");
+app.MapGet("/api/hello-world", () => "Hello World!")
+    .RequireCors("CorsPolicy");
 
 app.MapGet("/api/user", () => "Hello user")
+    .RequireCors("CorsPolicy")
     .RequireAuthorization("user");
 
 
