@@ -3,5 +3,6 @@
 public record UserLoginDto
     (
         string Login, 
-        string Password
+        string Password,
+        string Role
     );

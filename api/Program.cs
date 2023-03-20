@@ -42,9 +42,11 @@ builder.Services.AddCors(options =>
 {
         options.AddPolicy("CorsPolicy", policyBuilder =>
         {
-            policyBuilder.WithOrigins("http://localhost:5173")
+            policyBuilder.WithOrigins("https://localhost:5173/")
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials()
+                .SetIsOriginAllowed(str => true);
         });
 });
 
@@ -53,11 +55,12 @@ builder.Services.AddScoped<TokenValidator>();
 
 var app = builder.Build();
 
+app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseHttpsRedirection();
+
 
 app.MapPost("/api/auth/login", [AllowAnonymous]
 async(
@@ -73,6 +76,9 @@ async(
 
     if (!PasswordHasher.VerifyPassword(loginData.Password, user.HashPassword, user.Salt))
         return Results.BadRequest("Incorrect password");
+
+    if (!string.Equals(user.Role, loginData.Role, StringComparison.CurrentCultureIgnoreCase))
+        return Results.BadRequest("there is no user with this role");
     
     var accessToken = tokens.GenerateAccessToken(user);
     var (refreshTokenId, refreshToken) = tokens.GenerateRefreshToken();
