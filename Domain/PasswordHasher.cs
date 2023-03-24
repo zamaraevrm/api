@@ -1,7 +1,6 @@
-﻿using System.Runtime.Intrinsics.Arm;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 
-namespace api;
+namespace Domain;
 
 public static class PasswordHasher
 {

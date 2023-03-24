@@ -1,4 +1,4 @@
-﻿namespace api.Model.Response;
+﻿namespace Domain.Model.Response;
 
 public record UserResponseDto
 (

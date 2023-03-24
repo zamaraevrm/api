@@ -1,4 +1,4 @@
-﻿namespace api.Model.Request;
+﻿namespace Domain.Model.Request;
 
 public record UserLoginDto
     (

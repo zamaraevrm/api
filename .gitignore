@@ -1,4 +1,4 @@
 ﻿/api/Migrations/20230318181217_addNewRowsAtUser.cs
 /api/Migrations/20230318181217_addNewRowsAtUser.Designer.cs
-api/bin/
-api/obj/
+/api/bin/
+/api/obj/

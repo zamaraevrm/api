@@ -1,6 +1,6 @@
-﻿using api.Model.Response;
+﻿using Domain.Model.Response;
 
-namespace api.Model.Mapper;
+namespace Domain.Model.Mapper;
 
 public static class UserToUserResponseDot
 {

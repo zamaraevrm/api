@@ -1,9 +1,11 @@
 using System.Text;
 using api;
 using api.DataAccess;
-using api.Model.Mapper;
-using api.Model.Request;
-using api.Model.Response;
+using Domain;
+using Domain.Model;
+using Domain.Model.Mapper;
+using Domain.Model.Request;
+using Domain.Model.Response;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;

@@ -1,4 +1,4 @@
-﻿using api.Model;
+﻿using Domain.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.DataAccess

@@ -1,4 +1,4 @@
-﻿namespace api;
+﻿namespace Domain.Model;
 
 public record Token
 (

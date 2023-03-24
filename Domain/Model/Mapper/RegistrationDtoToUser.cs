@@ -1,8 +1,6 @@
-﻿using api.Model.Request;
-using api.Model.Response;
-using Microsoft.AspNetCore.Identity;
+﻿using Domain.Model.Request;
 
-namespace api.Model.Mapper;
+namespace Domain.Model.Mapper;
 
 public static class RegistrationDtoToUser
 {
