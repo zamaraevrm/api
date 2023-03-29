@@ -1,7 +1,7 @@
 ﻿using Domain.Model;
 using Microsoft.EntityFrameworkCore;
 
-namespace api.DataAccess
+namespace DataAccess.DataAccess
 {
     public class AppDbContext: DbContext
     {
