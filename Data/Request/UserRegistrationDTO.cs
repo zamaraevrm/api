@@ -1,4 +1,4 @@
-﻿namespace Domain.Model.Request;
+﻿namespace Data.Request;
 
 public record UserRegistrationDto
     (

@@ -1,6 +1,7 @@
-﻿using Domain.Model.Response;
+﻿using Data.Model;
+using Data.Response;
 
-namespace Domain.Model.Mapper;
+namespace Data.Mapper;
 
 public static class UserToUserResponseDot
 {

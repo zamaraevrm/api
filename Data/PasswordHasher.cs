@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Domain;
+namespace Data;
 
 public static class PasswordHasher
 {

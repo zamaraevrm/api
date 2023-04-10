@@ -1,4 +1,4 @@
-﻿namespace Domain.Model
+﻿namespace Data.Model
 {
     public class User
     {
@@ -10,5 +10,7 @@
         public byte[] HashPassword { get; set; } = default!;
         public byte[] Salt { get; set; } = default!;
         public string Role { get; set; } = default!;
+
+        public List<Token> Tokens { get; set; } = null!;
     }
 }

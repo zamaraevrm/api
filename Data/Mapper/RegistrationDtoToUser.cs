@@ -1,6 +1,7 @@
-﻿using Domain.Model.Request;
+﻿using Data.Model;
+using Data.Request;
 
-namespace Domain.Model.Mapper;
+namespace Data.Mapper;
 
 public static class RegistrationDtoToUser
 {
