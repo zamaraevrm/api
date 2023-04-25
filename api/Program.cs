@@ -75,6 +75,8 @@ app.MapGet("/user", () => "Hello user")
     .RequireCors("CorsPolicy")
     .RequireAuthorization("user");
 
+app.MapTemplate();
+
 
 
 app.Run();

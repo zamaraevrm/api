@@ -19,17 +19,27 @@ public static class AuthApi
         group.MapPost("/signup", SignUp).AllowAnonymous();
         group.MapPost("/refresh", Refresh).AllowAnonymous();
         group.MapDelete("/sign-out", Logout).AllowAnonymous();
+        group.MapPost("/signup-students", SignupStudents);
         
         return group;
     }
-    
+
+    private static async Task<IResult> SignupStudents(List<Student> students, AppDbContext db)
+    {
+        if (students.Count == 0)
+            return Results.BadRequest("empty array");
+
+        await db.Students.AddRangeAsync(students);
+        await db.SaveChangesAsync();
+        return Results.Ok();
+    }
+
     private static async Task<IResult> Logout(
         HttpRequest request,
         HttpResponse response,
         AppDbContext db,
         TokenValidator validator
     )
-    
     {
         var refreshToken = request.Cookies["refresh_token"];
 
@@ -108,7 +118,7 @@ public static class AuthApi
             return Results.Conflict("A user with this email address already exists.");
 
         var user = registrationData.ToUser();
-            
+
         await context.Users.AddAsync(user);
         await context.SaveChangesAsync();
             
