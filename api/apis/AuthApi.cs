@@ -4,7 +4,6 @@ using Data.Mapper;
 using Data.Model;
 using Data.Request;
 using Data.Response;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.apis;
@@ -15,9 +14,9 @@ public static class AuthApi
     {
         var group = routes.MapGroup("/auth");
         
-        group.MapPost("login", Login).AllowAnonymous();
+        group.MapPost("/login", Login).AllowAnonymous();
         group.MapPost("/signup", SignUp).AllowAnonymous();
-        group.MapPost("/refresh", Refresh).AllowAnonymous();
+        group.MapPut("/refresh", Refresh).AllowAnonymous();
         group.MapDelete("/sign-out", Logout).AllowAnonymous();
         group.MapPost("/signup-students", SignupStudents);
         

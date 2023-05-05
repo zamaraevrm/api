@@ -1,7 +1,7 @@
 ﻿using Data.Mapper;
 using DataAccess.DataAccess;
 using Microsoft.EntityFrameworkCore;
-using NGS.Templater;
+using TemplateEngine.Docx;
 
 namespace api.apis;
 
@@ -13,7 +13,7 @@ public static class TemplateApi
 
         group.MapGet("/{id}",GetTemplate);
         group.MapGet("/", GetTemplates);
-
+        
         return group;
     }
 
@@ -33,10 +33,10 @@ public static class TemplateApi
             .FirstOrDefaultAsync();
 
         if (template is null) return Results.NotFound();
-        
-        var factory = Configuration.Factory;
-        using var doc = factory.Open(template.Path);
 
-        return Results.Ok(doc.Templater.Tags);
+        using var doc = new TemplateProcessor(template.Path).SetRemoveContentControls(true);
+        
+
+        return Results.Ok(template);
     }
 }

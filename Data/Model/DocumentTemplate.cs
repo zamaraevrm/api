@@ -6,5 +6,6 @@ public class DocumentTemplate
     public string Name { get; set; } = string.Empty;
     public string Path { get; set; } = string.Empty;
 
-    public List<Document> Documents { get; set; } = new();
+    public ICollection<Document> Documents { get; } = new List<Document>();
+    public ICollection<Report> Reports { get; } = new List<Report>();
 }

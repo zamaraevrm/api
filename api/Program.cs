@@ -2,12 +2,12 @@ using System.Text;
 using api;
 using api.apis;
 using DataAccess.DataAccess;
-using Data;
-using Data.Model;
+using Data.JsonConverters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using TemplateEngine.Docx;
+using JsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,7 +38,6 @@ builder.Services.AddAuthorization(options =>
     );
 });
 
-
 var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 builder.Services.AddCors(options =>
 {
@@ -52,18 +51,21 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.Configure<JsonOptions>(options => 
+    options.SerializerOptions.Converters.Add(new DateOnlyConverter()));
+
 builder.Services.AddScoped<TokenGenerator>();
 builder.Services.AddScoped<TokenValidator>();
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+app.UsePathBase("/api");
+app.UseRouting();
 app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UsePathBase("/api");
-app.UseRouting();
 
 
 app.MapAuth();
@@ -75,9 +77,55 @@ app.MapGet("/user", () => "Hello user")
     .RequireCors("CorsPolicy")
     .RequireAuthorization("user");
 
-app.MapTemplate();
+app.MapTemplate().RequireCors("CorsPolicy").AllowAnonymous();
 
 
+app.MapPost("/doc", async (ReportRequest report) =>
+{
+    string path = @"C:\Users\zamar\Downloads\zachetnaya-vedomost-po-uchebnoj-praktike.docx";
+    string name = $"dsjkflk{DateTime.Now.ToShortDateString()}";
+    
+    //File.Copy(path, name);*/
+    
+    var content = new Content(
+            new FieldContent("Teacher",report.Teacher),
+            new FieldContent("Date",report.Date.ToShortDateString()),
+            new FieldContent("Group", report.Group),
+            new TableContent("Students", report.Students
+                .Select(student => 
+                    new TableRowContent(
+                        new FieldContent("Fullname",student.Fullname),
+                        new FieldContent("Assessment",student.Assessment.ToString())
+                        )
+                )
+            ));
+
+    await using var file = File.Open(path, FileMode.Open);
+    var memoryStream = new MemoryStream();
+    await file.CopyToAsync(memoryStream);
+    
+    
+    
+    using var doc = new TemplateProcessor(name).SetRemoveContentControls(true);
+    doc.FillContent(content);
+   
+    if (memoryStream.CanSeek) 
+         memoryStream.Seek(0, SeekOrigin.Begin);
+    return Results.File(memoryStream,
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        name);
+
+    
+});
 
 app.Run();
 
+record ReportRequest
+(
+    string Teacher,
+    string Group,
+    DateOnly Date,
+    List<StudentReportRequest> Students
+);
+
+record StudentReportRequest( string Fullname, int Assessment);
