@@ -7,7 +7,7 @@ namespace api.apis;
 
 public static class TemplateApi
 {
-    public static RouteGroupBuilder MapTemplate(this IEndpointRouteBuilder routeBuilder)
+    public static RouteGroupBuilder MapRoutesTemplate(this IEndpointRouteBuilder routeBuilder)
     {
         var group = routeBuilder.MapGroup("/templates");
 

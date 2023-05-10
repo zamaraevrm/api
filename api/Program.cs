@@ -12,7 +12,7 @@ using JsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -34,7 +34,7 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(
         "user",
-        policy => policy.RequireAuthenticatedUser().RequireRole("user")
+        policy => policy.RequireAuthenticatedUser().RequireRole("studnt")
     );
 });
 
@@ -66,18 +66,18 @@ app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapRoutesAuth();
+app.MapRoutesTemplate();
+app.MapRoutesGroup();
 
-
-app.MapAuth();
-
-app.MapGet("/hello-world", () => "Hello World!")
-    .RequireCors("CorsPolicy");
+app.MapGet("/hello-world", (HttpContext context) => context.User)
+    .RequireCors("CorsPolicy").RequireAuthorization("user");
 
 app.MapGet("/user", () => "Hello user")
     .RequireCors("CorsPolicy")
     .RequireAuthorization("user");
 
-app.MapTemplate().RequireCors("CorsPolicy").AllowAnonymous();
+app.MapRoutesTemplate().RequireCors("CorsPolicy").AllowAnonymous();
 
 
 app.MapPost("/doc", async (ReportRequest report) =>

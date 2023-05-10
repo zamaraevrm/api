@@ -10,7 +10,7 @@ namespace api.apis;
 
 public static class AuthApi
 {
-    public static RouteGroupBuilder MapAuth(this IEndpointRouteBuilder routes)
+    public static RouteGroupBuilder MapRoutesAuth(this IEndpointRouteBuilder routes)
     {
         var group = routes.MapGroup("/auth");
         
@@ -161,6 +161,6 @@ public static class AuthApi
             SameSite = SameSiteMode.Strict
         });
 
-        return Results.Ok(new LoginResponse(accessToken, user.ToUserResponse()));
+        return Results.Ok(accessToken);
     }
 }

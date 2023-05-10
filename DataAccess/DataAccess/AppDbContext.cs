@@ -13,6 +13,7 @@ namespace DataAccess.DataAccess
             modelBuilder.Entity<User>().UseTptMappingStrategy();
             modelBuilder.ApplyConfiguration(new StudentConfiguration());
             modelBuilder.ApplyConfiguration(new EmployeeConfiguration());
+            //modelBuilder.ApplyConfiguration(new DocumentConfiguration());
         }
         
         public DbSet<User> Users { get; set; }  
