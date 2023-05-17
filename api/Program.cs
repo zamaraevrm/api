@@ -1,8 +1,10 @@
+using System.Diagnostics;
 using System.Text;
 using api;
 using api.apis;
 using DataAccess.DataAccess;
 using Data.JsonConverters;
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -66,7 +68,7 @@ app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapRoutesAuth();
+app.MapRoutesAuth().RequireCors("CorsPolicy");
 app.MapRoutesTemplate();
 app.MapRoutesGroup();
 
@@ -80,13 +82,17 @@ app.MapGet("/user", () => "Hello user")
 app.MapRoutesTemplate().RequireCors("CorsPolicy").AllowAnonymous();
 
 
-app.MapPost("/doc", async (ReportRequest report) =>
+
+app.MapPost("/doc/{id}", async (string id, AppDbContext db, ReportRequest report) =>
 {
-    string path = @"C:\Users\zamar\Downloads\zachetnaya-vedomost-po-uchebnoj-praktike.docx";
-    string name = $"dsjkflk{DateTime.Now.ToShortDateString()}";
+    string templatePath = await db.DocumentTemplates
+        .Where(e => e.Id == Guid.Parse(id))
+        .Select(e => e.Path)
+        .FirstAsync();
     
-    //File.Copy(path, name);*/
-    
+    const string name = "dsjkflk.docx";
+    string outPath = Directory.GetCurrentDirectory() + name;
+
     var content = new Content(
             new FieldContent("Teacher",report.Teacher),
             new FieldContent("Date",report.Date.ToShortDateString()),
@@ -94,29 +100,34 @@ app.MapPost("/doc", async (ReportRequest report) =>
             new TableContent("Students", report.Students
                 .Select(student => 
                     new TableRowContent(
-                        new FieldContent("Fullname",student.Fullname),
+                        new FieldContent("FullName",student.Fullname),
                         new FieldContent("Assessment",student.Assessment.ToString())
                         )
                 )
             ));
+    File.Delete(outPath);
+    File.Copy(templatePath,outPath);
+    
 
-    await using var file = File.Open(path, FileMode.Open);
-    var memoryStream = new MemoryStream();
-    await file.CopyToAsync(memoryStream);
+    using(var doc = new TemplateProcessor(outPath)){
+        doc.FillContent(content);
+        doc.SaveChanges();
+    }
+    await using var fileStream = File.Open(outPath, FileMode.Open);
+
+    var dataStream = new MemoryStream();
+    await fileStream.CopyToAsync(dataStream);
+    if (dataStream.CanSeek) 
+        dataStream.Seek(0, SeekOrigin.Begin);
     
+
     
-    
-    using var doc = new TemplateProcessor(name).SetRemoveContentControls(true);
-    doc.FillContent(content);
-   
-    if (memoryStream.CanSeek) 
-         memoryStream.Seek(0, SeekOrigin.Begin);
-    return Results.File(memoryStream,
+    return Results.File(dataStream,
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         name);
-
-    
 });
+
+
 
 app.Run();
 
