@@ -101,6 +101,7 @@ app.MapPost("/doc/{id}", async (string id, AppDbContext db, ReportRequest report
                 .Select(student => 
                     new TableRowContent(
                         new FieldContent("FullName",student.Fullname),
+                        new FieldContent("Number", student.Number),
                         new FieldContent("Assessment",student.Assessment.ToString())
                         )
                 )
@@ -139,4 +140,4 @@ record ReportRequest
     List<StudentReportRequest> Students
 );
 
-record StudentReportRequest( string Fullname, int Assessment);
+record StudentReportRequest( string Fullname, string Number, int Assessment);
