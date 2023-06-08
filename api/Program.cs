@@ -1,10 +1,11 @@
-using System.Diagnostics;
 using System.Text;
+using System.Text.Json.Serialization;
 using api;
 using api.apis;
 using DataAccess.DataAccess;
 using Data.JsonConverters;
-using DocumentFormat.OpenXml.InkML;
+using Data.Mapper;
+using Data.Model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -36,11 +37,11 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(
         "user",
-        policy => policy.RequireAuthenticatedUser().RequireRole("studnt")
+        policy => policy.RequireAuthenticatedUser().RequireRole("student")
     );
 });
 
-var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+var origins = builder.Configuration?.GetSection("AllowedOrigins").Get<string[]>() ?? new []{""};
 builder.Services.AddCors(options =>
 {
         options.AddPolicy("CorsPolicy", policyBuilder =>
@@ -53,8 +54,11 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.Configure<JsonOptions>(options => 
-    options.SerializerOptions.Converters.Add(new DateOnlyConverter()));
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.Converters.Add(new DateOnlyConverter()); 
+    options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 
 builder.Services.AddScoped<TokenGenerator>();
 builder.Services.AddScoped<TokenValidator>();
@@ -81,6 +85,15 @@ app.MapGet("/user", () => "Hello user")
 
 app.MapRoutesTemplate().RequireCors("CorsPolicy").AllowAnonymous();
 
+app.MapGet("teacher/{id}/courses", async (string id, AppDbContext db) =>
+{
+    var courses = await db.Employees
+        .Where(t => t.Id == Guid.Parse(id))
+        .SelectMany(t => t.Courses.Select(course => course.ToCourseResponse()))
+        .ToListAsync();
+
+    return Results.Ok(courses);
+});
 
 
 app.MapPost("/doc/{id}", async (string id, AppDbContext db, ReportRequest report) =>

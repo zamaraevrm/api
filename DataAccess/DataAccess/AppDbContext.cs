@@ -27,5 +27,6 @@ namespace DataAccess.DataAccess
         public DbSet<EmployeeRole> EmployeeRoles { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
+        public DbSet<Message> Messages { get; set; }
     }
 }

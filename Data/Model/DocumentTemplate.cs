@@ -8,5 +8,5 @@ public class DocumentTemplate
     public string Type { get; set; } = string.Empty;
 
     public ICollection<Document> Documents { get; } = new List<Document>();
-    public ICollection<Report> Reports { get; } = new List<Report>();
+    
 }

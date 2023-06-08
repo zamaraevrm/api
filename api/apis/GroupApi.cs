@@ -12,35 +12,45 @@ public static class GroupApi
 
         group.MapGet("/", GetGroups);
         group.MapGet("/{id}", GetGroupById);
+        group.MapGet("/{id}/students", GetStudents);
         
         return group;
     }
 
-    private static async Task GetGroupById(string id, AppDbContext db)
+    private static async Task<IResult> GetStudents(string id, AppDbContext db)
     {
         var students = await db.Groups
             .Where(group => group.Id == Guid.Parse(id))
             .SelectMany(e => e.Students)
             .ToListAsync();
-            
-        var grope = await db.Groups
-            .Where(group => group.Id == Guid.Parse(id))
-            .FirstAsync();
+
+        return Results.Ok(students);
     }
 
-    private static async Task<List<response>> GetGroups(HttpContext context, AppDbContext db)
+    private static async Task<IResult> GetGroupById(string id, AppDbContext db)
+    {
+        var grope = await db.Groups
+            .Where(group => group.Id == Guid.Parse(id))
+            .Include(group => group.Students)
+            .Include(group => group.Courses)
+            .FirstOrDefaultAsync();
+
+        return Results.Ok(grope);
+    }
+
+    private static async Task<List<Response>> GetGroups(HttpContext context, AppDbContext db)
     {
         return await db.Groups.Select(group => group.GroupToResponse()).ToListAsync();
     }
 }
 
-record response(Guid Id, string Name, int Year);
+record Response(Guid Id, string Name, int Year);
 
-file static class maper
+file static class Mapper
 {
-    public static response GroupToResponse(this Group group)
+    public static Response GroupToResponse(this Group group)
     {
-        return new response(group.Id, group.Name, group.Year);
+        return new Response(group.Id, group.Name, group.Year);
 
     }
 }

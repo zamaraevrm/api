@@ -5,9 +5,11 @@ public class Course
     public Guid Id { get; set; }
     public Guid LessonId { get; set; }
     public Guid TeacherId { get; set; }
+    public Guid GroupId { get; set; }
     public float Duration { get; set; }
     public string Type { get; set; } = null!;
 
+    public Group Group { get; set; } = null!;
     public Lesson Lesson { get; set; } = null!;
     public Employee Teacher { get; set; } = null!;
 
